@@ -66,9 +66,9 @@ class Bd {
       if(despesa === null) {
         continue
       }
-
+      despesa.id = i;
       // console.log(i, despesa)
-      despesas.push(despesa)
+      despesas.push(despesa);
     }
     // console.log(despesas);
     return despesas;
@@ -120,6 +120,10 @@ class Bd {
     } 
     
     return despesasFiltradas
+  }
+
+  remover(id) {
+    localStorage.removeItem(id)
   }
   
 }
@@ -182,16 +186,15 @@ function cadastrarDespesa() {
 }
 
 
-function carregaListaDespesa() {
+function carregaListaDespesa(despesas = Array(), filtro = false) {
 
-  let despesas = Array()
-
-  despesas = bd.recuperarTodosRegistro()
-
-  // console.log(despesas);
+  if(despesas.length == 0 && filtro == false) {
+    despesas = bd.recuperarTodosRegistro()
+  }
 
   //selecionando os elementos tbody da tabela
   let listaDespesas = document.getElementById('listaDespesas');
+  listaDespesas.innerHTML = ''
 
   //percoorer o array despesas, listando cada despesa de forma dinamica
   despesas.forEach(function(d) {
@@ -249,8 +252,27 @@ function carregaListaDespesa() {
     linha.insertCell(1).innerHTML = d.tipo
     linha.insertCell(2).innerHTML = d.descricao
     linha.insertCell(3).innerHTML = d.valor
-  });
 
+    // botão de exclusão
+    let btn = document.createElement("button")
+    btn.className = 'btn btn-danger'
+    btn.innerHTML = '<i class="fas fa-times"></i>'
+    btn.id = `id_despesa_${d.id}` 
+    btn.onclick = function() {
+      //remover a despesa
+      let id = this.id.replace('id_despesa_', '');
+      
+      //alert(this.id)
+
+      bd.remover(id);
+
+      window.location.reload()
+      
+    }
+    linha.insertCell(4).append(btn);
+
+    console.log(d);
+  });
 }
 
 //Filtro de pesquisa
@@ -269,66 +291,5 @@ function pesquisarDespesa() {
 
   // console.log(despesa);
 
-  //selecionando os elementos tbody da tabela
-  let listaDespesas = document.getElementById('listaDespesas');
-  listaDespesas.innerHTML = ''
-
-  //percoorer o array despesas, listando cada despesa de forma dinamica
-  despesas.forEach(function(d) {
-    // console.log(d);
-
-    //criando a linha (tr)
-    let linha = listaDespesas.insertRow()
-
-    //ajustar o mes
-    switch(d.mes) {
-    case '0': d.mes = ''
-      break
-    case '1': d.mes = 'Janeiro'
-      break
-    case '2': d.mes = 'Fevereiro'
-      break
-    case '3': d.mes = 'Março'
-      break
-    case '4': d.mes = 'Abril'
-      break
-    case '5': d.mes = 'Maio'
-      break
-    case '6': d.mes = 'Junho'
-      break
-    case '7': d.mes = 'Julho'
-      break
-    case '8': d.mes = 'Agosto'
-      break
-    case '9': d.mes = 'Setembro'
-      break
-    case '10': d.mes = 'Outubro'
-      break
-    case '11': d.mes = 'Novembro'
-      break
-    case '12': d.mes = 'Dezembro'
-      break
-    }
-
-    //ajustar o tipo
-    switch(d.tipo) {
-      case '1': d.tipo = 'Alimentação'
-      break
-      case '2': d.tipo = 'Educação'
-      break
-      case '3': d.tipo = 'Lazer'
-      break
-      case '4': d.tipo = 'Saúde'
-      break
-      case '5': d.tipo = 'Transporte'
-      break
-    }
-    
-    //inserir valores, colunas (td)
-    linha.insertCell(0).innerHTML =  `${d.dia}/${d.mes}/${d.ano}`
-    linha.insertCell(1).innerHTML = d.tipo
-    linha.insertCell(2).innerHTML = d.descricao
-    linha.insertCell(3).innerHTML = d.valor
-  });
-
+  this.carregaListaDespesa(despesas, true)
 }
